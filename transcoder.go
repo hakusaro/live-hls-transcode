@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -75,6 +76,8 @@ func (transcoder Transcoder) StartTranscoder(sourceFile string, destinationFolde
 	log.Printf("%s: Probing Duration", sourceFile)
 	duration := transcoder.ProbeDuration(sourceFile)
 
+	subtitleFilter := transcoder.ProbeSubtitleFilter(sourceFile)
+
 	cmdHead := []string{
 		"-v", "error",
 		"-hide_banner",
@@ -96,10 +99,17 @@ func (transcoder Transcoder) StartTranscoder(sourceFile string, destinationFolde
 		"-profile", "main",
 		"-level", "4.0",
 	}
+	if subtitleFilter != "" {
+		cmdAccNone = append(cmdAccNone, "-vf", subtitleFilter)
+	}
 
+	filter := "scale=iw*sar:ih,setsar=1:1"
+	if subtitleFilter != "" {
+		filter = filter + "," + subtitleFilter
+	}
 	cmdAccH264V4l2m2m := []string{
 		"-threads", "8",
-		"-vf", "scale=iw*sar:ih,setsar=1:1",
+		"-vf", filter,
 		"-c:v:0", "h264_v4l2m2m",
 		"-pix_fmt", "yuv420p",
 		"-bufsize", "8192k",
@@ -161,6 +171,46 @@ func (transcoder Transcoder) StartTranscoder(sourceFile string, destinationFolde
 	handle.isRunning = true
 	go handle.readStdOut()
 	return &handle
+}
+
+func (transcoder Transcoder) ProbeSubtitleFilter(source string) string {
+	cmd := exec.Command(
+		"ffprobe",
+		"-v", "error",
+		"-select_streams", "s",
+		"-show_entries", "stream=index:stream_tags=language",
+		"-of", "json",
+		source,
+	)
+
+	output, err := cmd.Output()
+	if err != nil {
+		log.Printf("%s: Unable to probe Subtitles", source)
+		return ""
+	}
+
+	ffprobeOutput := struct {
+		Streams []struct {
+			Index int `json:"index"`
+			Tags  struct {
+				Language string `json:"language"`
+			} `json:"tags"`
+		} `json:"streams"`
+	}{}
+
+	err = json.Unmarshal(output, &ffprobeOutput)
+	if err != nil {
+		log.Printf("%s: Unable to read Subtitle-Info: %v\n%s", source, err, output)
+		return ""
+	}
+
+	for _, stream := range ffprobeOutput.Streams {
+		if strings.ToLower(stream.Tags.Language) == "eng" {
+			return fmt.Sprintf("subtitles='%s':si=%d", source, stream.Index)
+		}
+	}
+
+	return ""
 }
 
 func (transcoder Transcoder) ProbeDuration(source string) time.Duration {
