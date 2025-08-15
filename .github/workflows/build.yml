@@ -38,7 +38,7 @@ jobs:
         GOOS=linux GOARCH=arm64 go build -o "live-hls-transcode@linux-arm64"
 
     - name: Upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Binaries
         path: live-hls-transcode@*
