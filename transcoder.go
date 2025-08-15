@@ -206,7 +206,8 @@ func (transcoder Transcoder) ProbeSubtitleFilter(source string) string {
 
 	for _, stream := range ffprobeOutput.Streams {
 		if strings.ToLower(stream.Tags.Language) == "eng" {
-			return fmt.Sprintf("subtitles='%s':si=%d", source, stream.Index)
+			escaped := escapeFFmpegPath(source)
+			return fmt.Sprintf("subtitles=%s:si=%d", escaped, stream.Index)
 		}
 	}
 
@@ -330,6 +331,17 @@ func (handle *TranscoderHandle) readStdOut() {
 			log.Printf("%s: Transcoding... %s", handle.sourceFile, v)
 		}
 	}
+}
+
+func escapeFFmpegPath(path string) string {
+	replacer := strings.NewReplacer(
+		"\\", "\\\\",
+		":", "\\:",
+		"?", "\\?",
+		"'", "\\'",
+		" ", "\\ ",
+	)
+	return replacer.Replace(path)
 }
 
 func splitKeyValue(line string) (string, string) {
