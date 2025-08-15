@@ -9,7 +9,7 @@ That's where this very specialized piece of modern software art got you covered:
 You can browse through your files with a mobile-friendly Web-UI (better than the apache/nginx directory index!), access any files that
 your device can natively read and start a ffmpeg-based transcoder process to h264/AAC in HLS for the files it can't read. After only some
 seconds you can start to stream this funny little clip you laughed so hard over when you were a teen to our device. If an English subtitle
-track is present it will be burned into the transcoded output so the subtitles are displayed automatically.
+track is present it will be burned into the transcoded output so the subtitles are displayed automatically. Videos are deinterlaced using ffmpeg's `yadif` filter by default to improve playback quality.
 
 The HLS-Stream is of type *EVENT*, so for compatible Players* it starts as a Live-Stream, that soon becomes navigatable as the
 transcoding continues to convert more and more of the source material. Once the transcoder is done completely, the HLS-Playlist gets

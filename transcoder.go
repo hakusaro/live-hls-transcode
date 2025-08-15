@@ -88,8 +88,13 @@ func (transcoder Transcoder) StartTranscoder(sourceFile string, destinationFolde
 		"-analyzeduration", "20000000",
 	}
 
+	filterNone := "yadif"
+	if subtitleFilter != "" {
+		filterNone += "," + subtitleFilter
+	}
 	cmdAccNone := []string{
 		"-threads", "16",
+		"-vf", filterNone,
 		"-c:v:0", "libx264",
 		"-pix_fmt", "yuv420p",
 		"-bufsize", "8192k",
@@ -99,17 +104,14 @@ func (transcoder Transcoder) StartTranscoder(sourceFile string, destinationFolde
 		"-profile", "main",
 		"-level", "4.0",
 	}
-	if subtitleFilter != "" {
-		cmdAccNone = append(cmdAccNone, "-vf", subtitleFilter)
-	}
 
-	filter := "scale=iw*sar:ih,setsar=1:1"
+	filterAccel := "yadif,scale=iw*sar:ih,setsar=1:1"
 	if subtitleFilter != "" {
-		filter = filter + "," + subtitleFilter
+		filterAccel += "," + subtitleFilter
 	}
 	cmdAccH264V4l2m2m := []string{
 		"-threads", "8",
-		"-vf", filter,
+		"-vf", filterAccel,
 		"-c:v:0", "h264_v4l2m2m",
 		"-pix_fmt", "yuv420p",
 		"-bufsize", "8192k",
