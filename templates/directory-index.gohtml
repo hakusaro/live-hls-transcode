@@ -14,52 +14,52 @@
 	<input type="text" class="form-control" id="search" placeholder="Filter…">
 	<ul class="list-group mt-3" id="filter-list">
         {{range .Files}}
-			<li class="list-group-item" data-url="{{.Url}}">
-				<div class="row">
+                        <li class="list-group-item" data-url="{{.Url}}">
+                                <div class="row">
                     {{if .IsDir}}
-						<div class="col-12 text-truncate">
-							<a href="{{.Name}}/">
-								<i class="far fa-folder mr-1"></i>
+                                                <div class="col-12 text-truncate">
+                                                        <a href="{{.EncodedName}}/">
+                                                                <i class="far fa-folder mr-1"></i>
                                 {{.Name}}
-							</a>
-						</div>
+                                                        </a>
+                                                </div>
                     {{else if or .CanStream .CanPlay}}
-						<div class="col-md-8 text-truncate">
-							{{if .CanStream}}
-							<a href="{{.Name}}?stream">
-								<i class="far fa-file-video mr-1"></i>
-								{{.Name}}
-								<em>(Stream)</em>
-							</a>
-							{{else if .CanPlay}}
-							<a href="{{.Name}}?play">
-								<i class="far fa-file-video mr-1"></i>
-								{{.Name}}
-								<em>(Play)</em>
-							</a>
-							{{end}}
-						</div>
-						<div class="col-md-4 text-right">
-							<i>{{.Size}}</i>
-							<a href="{{.Name}}" class="font-italic">
-								Download
-								<i class="fas fa-download"></i>
-							</a>
-						</div>
+                                                <div class="col-md-8 text-truncate">
+                                                        {{if .CanStream}}
+                                                        <a href="{{.EncodedName}}?stream">
+                                                                <i class="far fa-file-video mr-1"></i>
+                                                                {{.Name}}
+                                                                <em>(Stream)</em>
+                                                        </a>
+                                                        {{else if .CanPlay}}
+                                                        <a href="{{.EncodedName}}?play">
+                                                                <i class="far fa-file-video mr-1"></i>
+                                                                {{.Name}}
+                                                                <em>(Play)</em>
+                                                        </a>
+                                                        {{end}}
+                                                </div>
+                                                <div class="col-md-4 text-right">
+                                                        <i>{{.Size}}</i>
+                                                        <a href="{{.EncodedName}}" class="font-italic">
+                                                                Download
+                                                                <i class="fas fa-download"></i>
+                                                        </a>
+                                                </div>
                     {{else}}
-						<div class="col-md-8 text-truncate">
-							<a href="{{.Name}}">
-								<i class="far fa-file mr-1"></i>
+                                                <div class="col-md-8 text-truncate">
+                                                        <a href="{{.EncodedName}}">
+                                                                <i class="far fa-file mr-1"></i>
                                 {{.Name}}
-							</a>
-						</div>
-						<div class="col-md-4 text-right">
-							<i>{{.Size}}</i>
-						</div>
+                                                        </a>
+                                                </div>
+                                                <div class="col-md-4 text-right">
+                                                        <i>{{.Size}}</i>
+                                                </div>
                     {{end}}
-				</div>
-				<div class="playback-progress"></div>
-			</li>
+                                </div>
+                                <div class="playback-progress"></div>
+                        </li>
         {{end}}
 	</ul>
 {{end}}

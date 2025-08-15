@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -23,12 +24,13 @@ type DirectoryIndex struct {
 }
 
 type TemplateFileDto struct {
-	Name      string
-	Url       string
-	IsDir     bool
-	Size      string
-	CanStream bool
-	CanPlay   bool
+	Name        string
+	EncodedName string
+	Url         string
+	IsDir       bool
+	Size        string
+	CanStream   bool
+	CanPlay     bool
 }
 
 func NewDirectoryIndex(transcodeExtensions []string, playerExtensions []string) DirectoryIndex {
@@ -87,13 +89,18 @@ func (directoryIndex *DirectoryIndex) buildTemplateFileDtos(directoryPath string
 
 		extension := strings.ToLower(strings.TrimLeft(filepath.Ext(fileInfo.Name()), "."))
 
+		encodedName := url.PathEscape(fileInfo.Name())
+		fullPath := directoryPath + fileInfo.Name()
+		encodedUrl := (&url.URL{Path: fullPath}).String()
+
 		templateFiles = append(templateFiles, TemplateFileDto{
-			fileInfo.Name(),
-			directoryPath + fileInfo.Name(),
-			fileInfo.IsDir(),
-			humanize.Bytes(uint64(fileInfo.Size())),
-			funk.ContainsString(directoryIndex.transcodeExtensions, extension),
-			funk.ContainsString(directoryIndex.playerExtensions, extension),
+			Name:        fileInfo.Name(),
+			EncodedName: encodedName,
+			Url:         encodedUrl,
+			IsDir:       fileInfo.IsDir(),
+			Size:        humanize.Bytes(uint64(fileInfo.Size())),
+			CanStream:   funk.ContainsString(directoryIndex.transcodeExtensions, extension),
+			CanPlay:     funk.ContainsString(directoryIndex.playerExtensions, extension),
 		})
 	}
 
@@ -118,7 +125,7 @@ func sortByNameDirectoriesFirst(fileInfos []os.FileInfo) {
 }
 
 func (directoryIndex *DirectoryIndex) redirectPathsWithoutSlash(writer http.ResponseWriter, request *http.Request) {
-	requestPath := request.URL.Path
+	requestPath := request.URL.EscapedPath()
 	if !strings.HasSuffix(requestPath, "/") {
 		http.Redirect(writer, request, requestPath+"/", http.StatusSeeOther)
 	}

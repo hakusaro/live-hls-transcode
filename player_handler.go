@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 	"path/filepath"
 )
 
@@ -29,15 +30,16 @@ func (handler *PlayerHandler) Handle(writer http.ResponseWriter, request *http.R
 		case NoStream:
 		case StreamTranscodingFailed:
 		case StreamInPreparation:
-			streamInfoUrl := mappingResult.UrlPath + "?stream"
-			http.Redirect(writer, request, streamInfoUrl, http.StatusSeeOther)
+			RelativeRedirect(writer, request, "?stream", http.StatusSeeOther)
 			return
 		}
 	}
 
 	writer.Header().Add("Content-Type", "text/html; charset=utf-8")
 
-	playbackUrl := mappingResult.UrlPath
+	encodedUrl := (&url.URL{Path: mappingResult.UrlPath}).String()
+
+	playbackUrl := encodedUrl
 	if isStream {
 		playbackUrl += "?stream&playlist"
 	}
@@ -51,7 +53,7 @@ func (handler *PlayerHandler) Handle(writer http.ResponseWriter, request *http.R
 	}{
 		dir,
 		file,
-		mappingResult.UrlPath,
+		encodedUrl,
 		playbackUrl,
 	}); err != nil {
 		log.Printf("Template-Formatting failed: %s", err)

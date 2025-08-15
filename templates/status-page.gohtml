@@ -148,9 +148,9 @@
 
 				<ul class="mt-3">
                     {{range .OtherRunningTranscoders}}
-						<li>
-							<a href="{{.UrlPath}}?stream">{{.UrlPath}}</a>
-						</li>
+                                                <li>
+                                                        <a href="{{.EncodedUrlPath}}?stream">{{.UrlPath}}</a>
+                                                </li>
                     {{end}}
 				</ul>
 			</div>
