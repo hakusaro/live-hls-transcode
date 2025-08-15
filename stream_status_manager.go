@@ -4,6 +4,7 @@ import (
 	"github.com/gosimple/slug"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
 	"sync"
 	"time"
@@ -33,6 +34,7 @@ func NewStreamStatusManager(tempDir string, transcoder Transcoder) StreamStatusM
 type StreamInfo struct {
 	CalculatedPath string
 	UrlPath        string
+	EncodedUrlPath string
 	TempDir        string
 	handle         *TranscoderHandle
 	LastAccess     time.Time
@@ -121,12 +123,15 @@ func (manager *StreamStatusManager) StartStream(calculatedPath string, urlPath s
 	log.Printf("%s: Starting Stream-Transcoder into %s", calculatedPath, tempDir)
 	handle := manager.transcoder.StartTranscoder(calculatedPath, tempDir)
 
+	encodedUrl := (&url.URL{Path: urlPath}).String()
+
 	manager.streamInfo[calculatedPath] = StreamInfo{
-		calculatedPath,
-		urlPath,
-		tempDir,
-		handle,
-		time.Now(),
+		CalculatedPath: calculatedPath,
+		UrlPath:        urlPath,
+		EncodedUrlPath: encodedUrl,
+		TempDir:        tempDir,
+		handle:         handle,
+		LastAccess:     time.Now(),
 	}
 }
 
